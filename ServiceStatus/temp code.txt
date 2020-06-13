@@ -1,0 +1,74 @@
+ /*
+        public void ExecuteBatchFile(string pathOfBatchFile)
+        {
+            var info = new ProcessStartInfo
+            {
+                FileName = pathOfBatchFile,
+                WindowStyle = ProcessWindowStyle.Hidden
+            };
+            Process.Start(info)?.WaitForExit();
+        }
+        
+        public Dictionary<string, string> GetServiceStatus(List<string> ServiceNames)
+        {
+            //check service
+            Dictionary<string, string> serviceStatusDic = new Dictionary<string, string>();
+            var services = ServiceController.GetServices();
+            string serviceStatus = string.Empty;
+            bool isServiceExist = false;
+            foreach (var serviceRunning in services)
+                foreach (var serviceToLookup in ServiceNames)
+                    if (serviceRunning.ServiceName == serviceToLookup)
+                    {
+                        serviceStatusDic.Add(serviceToLookup, serviceRunning.Status.ToString());
+                        serviceStatus = "Service installed , current status: " + serviceRunning.Status;
+                        isServiceExist = true;
+                    }
+
+            if (!isServiceExist)
+                serviceStatus = "Service is not installed";
+
+            return serviceStatusDic;
+        }
+        
+        public void StartStopService(string ServiceName, bool startService)
+        {
+            ServiceController service = new ServiceController(ServiceName);
+
+            if (startService)
+                if ((service.Status.Equals(ServiceControllerStatus.Stopped)) ||
+                    (service.Status.Equals(ServiceControllerStatus.StopPending)))
+                    service.Start();
+                else service.Stop();
+        }
+        
+        public DataTable GetServiceStatusContent(string excelPath, string excelSheet)
+        {
+            // Convert Exceldata to datatable
+            var dtExl = ExcelHelper.ExcelRead(excelSheet, excelPath);
+            DataTable dtContent = new DataTable();
+            // Iterate machines
+            foreach (DataColumn col in dtExl.Columns)
+            {
+                List<string> lst = new List<string>();
+                if (col.ColumnName == "Service")
+                    continue;
+                else
+                {
+                    // Login to access machine
+                }
+                foreach (DataRow row in dtExl.Rows)
+                {
+                    lst.Add(row[1].ToString());
+                    // store machine services in dt
+                    var service = "";
+                }
+                // Logout machine
+            }
+            // Iterate Services
+            // Strore in a Datatable
+            // start service
+            // Return Datatable
+            return dtContent;
+        }
+        */
