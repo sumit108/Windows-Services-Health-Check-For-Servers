@@ -2,8 +2,8 @@ C:\Users\SumitThapar\Documents\Visual Studio 2015\Projects\ServiceStatus\Service
 C:\Users\SumitThapar\Documents\Visual Studio 2015\Projects\ServiceStatus\ServiceStatus\bin\Debug\NUnit3.TestAdapter.pdb
 C:\Users\SumitThapar\Documents\Visual Studio 2015\Projects\ServiceStatus\ServiceStatus\bin\Debug\nunit.engine.dll
 C:\Users\SumitThapar\Documents\Visual Studio 2015\Projects\ServiceStatus\ServiceStatus\bin\Debug\nunit.engine.api.dll
-C:\Users\SumitThapar\Documents\Visual Studio 2015\Projects\ServiceStatus\ServiceStatus\bin\Debug\ServiceStatus.exe.config
-C:\Users\SumitThapar\Documents\Visual Studio 2015\Projects\ServiceStatus\ServiceStatus\bin\Debug\ServiceStatus.exe
+C:\Users\SumitThapar\Documents\Visual Studio 2015\Projects\ServiceStatus\ServiceStatus\bin\Debug\ServiceStatus.dll.config
+C:\Users\SumitThapar\Documents\Visual Studio 2015\Projects\ServiceStatus\ServiceStatus\bin\Debug\ServiceStatus.dll
 C:\Users\SumitThapar\Documents\Visual Studio 2015\Projects\ServiceStatus\ServiceStatus\bin\Debug\ServiceStatus.pdb
 C:\Users\SumitThapar\Documents\Visual Studio 2015\Projects\ServiceStatus\ServiceStatus\bin\Debug\DocumentFormat.OpenXml.dll
 C:\Users\SumitThapar\Documents\Visual Studio 2015\Projects\ServiceStatus\ServiceStatus\bin\Debug\EPPlus.dll
@@ -27,6 +27,6 @@ C:\Users\SumitThapar\Documents\Visual Studio 2015\Projects\ServiceStatus\Service
 C:\Users\SumitThapar\Documents\Visual Studio 2015\Projects\ServiceStatus\ServiceStatus\bin\Debug\System.Security.Permissions.xml
 C:\Users\SumitThapar\Documents\Visual Studio 2015\Projects\ServiceStatus\ServiceStatus\bin\Debug\System.Security.Principal.Windows.xml
 C:\Users\SumitThapar\Documents\Visual Studio 2015\Projects\ServiceStatus\ServiceStatus\bin\Debug\System.ServiceProcess.ServiceController.xml
-C:\Users\SumitThapar\Documents\Visual Studio 2015\Projects\ServiceStatus\ServiceStatus\obj\Debug\ServiceStatus.csprojResolveAssemblyReference.cache
-C:\Users\SumitThapar\Documents\Visual Studio 2015\Projects\ServiceStatus\ServiceStatus\obj\Debug\ServiceStatus.exe
+C:\Users\SumitThapar\Documents\Visual Studio 2015\Projects\ServiceStatus\ServiceStatus\obj\Debug\ServiceStatus.dll
 C:\Users\SumitThapar\Documents\Visual Studio 2015\Projects\ServiceStatus\ServiceStatus\obj\Debug\ServiceStatus.pdb
+C:\Users\SumitThapar\Documents\Visual Studio 2015\Projects\ServiceStatus\ServiceStatus\obj\Debug\ServiceStatus.csprojResolveAssemblyReference.cache

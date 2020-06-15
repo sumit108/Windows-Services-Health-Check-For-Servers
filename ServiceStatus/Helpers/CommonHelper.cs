@@ -12,5 +12,13 @@ namespace ServiceStatus.Helpers
             var projectPath = new Uri(assemblyPath).LocalPath;
             return Path.GetDirectoryName(projectPath) + "\\";
         }
+
+        public enum YesNo
+        {
+            yes=1,
+            Yes = 1,
+            no =0,
+            No = 0
+        }
     }
 }

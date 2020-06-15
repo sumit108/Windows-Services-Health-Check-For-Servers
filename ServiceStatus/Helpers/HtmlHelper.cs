@@ -12,8 +12,10 @@ namespace ServiceStatus.Helpers
         public StringBuilder GenerateHtmlResult(List<MachineData> machineServicesList)
         {
             bool isHeader = true;
-            var services = string.Empty;
-            var machines = string.Empty;
+            var servicesSkipped = string.Empty;
+            var machinesSkipped = string.Empty;
+            string servicesStarted = string.Empty;
+            string servicesStopped = string.Empty;
 
             StringBuilder strHTMLBuilder = new StringBuilder();
             strHTMLBuilder.Append("<p>Ran from Machine : " + Environment.MachineName + "</p>");
@@ -33,16 +35,16 @@ namespace ServiceStatus.Helpers
                 if (isHeader)
                 {
                     strHTMLBuilder.Append("<tr " + headerStyle + ">");
-                    strHTMLBuilder.Append("<td>");
+                    strHTMLBuilder.Append("<th>");
                     strHTMLBuilder.Append("Machine Name");
-                    strHTMLBuilder.Append("</td>");
+                    strHTMLBuilder.Append("</th>");
                     foreach (var service in machine.services)
                     {
                         if (!service.IsServiceSkipped)
                         {
-                            strHTMLBuilder.Append("<td>");
+                            strHTMLBuilder.Append("<th>");
                             strHTMLBuilder.Append(service.Service);
-                            strHTMLBuilder.Append("</td>");
+                            strHTMLBuilder.Append("</th>");
                         }
                     }
                     strHTMLBuilder.Append("</tr>");
@@ -50,21 +52,19 @@ namespace ServiceStatus.Helpers
                 }
 
                 strHTMLBuilder.Append("<tr>");
-                strHTMLBuilder.Append("<td>");
+                strHTMLBuilder.Append("<td><b>");
                 strHTMLBuilder.Append(machine.MachineName);
-                strHTMLBuilder.Append("</td>");
+                strHTMLBuilder.Append("</b></td>");
 
                 if (machine.ErrorMessage == null)
                 {
                     foreach (var service in machine.services)
-                    {
                         if (!service.IsServiceSkipped)
                         {
-                            strHTMLBuilder.Append("<td " + (service.IsServiceCheckSuccess ? isAsExpectedStyle : isNotAsExpectedStyle) + ">");
+                            strHTMLBuilder.Append("<td " + (service.IsServiceStatusAsExpected ? isAsExpectedStyle : isNotAsExpectedStyle) + ">");
                             strHTMLBuilder.Append(service.CurrentServiceStatus);
                             strHTMLBuilder.Append("</td>");
                         }
-                    }
                 }
                 else
                 {
@@ -73,7 +73,7 @@ namespace ServiceStatus.Helpers
                             unskippedServiceCount++;
                     strHTMLBuilder.Append("<td colspan=" + unskippedServiceCount + " " + isNotAsExpectedStyle + ">");
                     strHTMLBuilder.Append(machine.ErrorMessage);
-                    strHTMLBuilder.Append("<td>");
+                    strHTMLBuilder.Append("</td>");
                 }
                 strHTMLBuilder.Append("</tr>");
             }
@@ -81,24 +81,40 @@ namespace ServiceStatus.Helpers
 
             foreach (var machine in machineServicesList)
             {
+                string machineName = machine.MachineName;
                 if (machine.IsMachineSkipped)
-                    machines += machine.MachineName + ",";
+                {
+                    machinesSkipped += machine.MachineName + ",";
+                    continue;
+                }
+                else if (machine.ErrorMessage != null)
+                    continue;
                 else
                     foreach (var service in machine.services)
                     {
                         if (service.IsServiceSkipped)
-                            services += service.Service + ",";
+                            servicesSkipped += service.Service + ",";
 
                         //if (service.IsServiceCheckSuccess)
                         if (service.IsStartStopSuccess)
-                            strHTMLBuilder.Append("<p>" + service.StartStopMessage + " for Machine " + machine.MachineName + "</p>");
-                    }
-                if (services != string.Empty)
-                    strHTMLBuilder.Append("<p>Service " + services + " skipped for " + machine.MachineName + "</p>");
-            }
-            if (machines != string.Empty)
-                strHTMLBuilder.Append("<p>Service check skipped for Machine " + machines + "</p>");
+                        {
+                            if (service.IsStarted)
+                                servicesStarted += service.Service + ",";
 
+                            if (service.IsStopped)
+                                servicesStopped += service.Service + ",";
+                        }
+                        else { strHTMLBuilder.Append(service.StartStopMessage); }
+                    }
+                if (servicesSkipped != string.Empty)
+                    strHTMLBuilder.Append("<p>Service <b>" + servicesSkipped.TrimEnd(',') + " skipped </b>for<b> " + machineName + "</b></p>");
+                if (servicesStarted != string.Empty)
+                    strHTMLBuilder.Append("<p><b>" + servicesStarted.TrimEnd(',') + "</b> service <b>Started Successfully </b>" + " for Machine <b>" + machine.MachineName + "</b></p>");
+                if (servicesStopped != string.Empty)
+                    strHTMLBuilder.Append("<p><b>" + servicesStopped.TrimEnd(',') + "</b> service <b> Stopped Successfully </b>" + " for Machine <b>" + machine.MachineName + "</b></p>");
+            }
+            if (machinesSkipped != string.Empty)
+                strHTMLBuilder.Append("<p>Service check <b>skipped</b> for Machine <b>" + machinesSkipped.TrimEnd(',') + "</b></p>");
             return strHTMLBuilder;
         }
 

@@ -5,6 +5,7 @@ using static System.Configuration.ConfigurationManager;
 using System.Management;
 using System.ServiceProcess;
 using ServiceStatus.Property;
+using static ServiceStatus.Helpers.CommonHelper;
 
 namespace ServiceStatus
 {
@@ -109,15 +110,20 @@ namespace ServiceStatus
                 bool isLoginSuccess = false;
 
                 // Login to Webserver
-                bool skipMachine = Convert.ToBoolean(row[1]);
-                if (!skipMachine)
+                bool processMachine = Convert.ToBoolean(Enum.Parse(typeof(YesNo), row[1].ToString()));
+                md.MachineName = row[0].ToString();
+                if (processMachine)
                 {
-                    md.IsMachineSkipped = false;
-                    md.MachineName = row[0].ToString();
                     scope = LoginToMachine(md.MachineName, out isLoginSuccess);
                     md.isSuccess = isLoginSuccess;
                 }
-                else { md.IsMachineSkipped = true; continue; }
+                else
+                {
+                    md.IsMachineSkipped = true;
+                    MachineServicesList.Add(md);
+                    //MachineServicesList[machineCounter].IsMachineSkipped = md.IsMachineSkipped;
+                    continue;
+                }
 
                 //if (isLoginSuccess)
                 //{
@@ -125,15 +131,14 @@ namespace ServiceStatus
                 servicesFromExcel = GetServiceData(excelDatatable, md.MachineName);
 
                 // Get Current Service Status
-                ServiceController sc = GetCurrentServiceStatus(servicesFromExcel, scope);
+                GetCurrentServiceStatus(servicesFromExcel, scope);
 
                 // Service ON/Off
-                StartStopServices(servicesFromExcel, sc);
+                StartStopServices(servicesFromExcel, scope);
                 //}
 
                 // Add Service Data To Machine data                
                 md.services = servicesFromExcel;
-                MachineServicesList[machineCounter].IsMachineSkipped = md.IsMachineSkipped;
                 MachineServicesList[machineCounter++].services = md.services;
                 scope = null;
             }
@@ -146,14 +151,14 @@ namespace ServiceStatus
             for (int col = 2; col < excelDatatable.Columns.Count; col++)
             {
                 DataColumn column = excelDatatable.Columns[col];
-                if (Convert.ToBoolean(Convert.ToInt32(excelDatatable.Rows[1][col].ToString()))) continue;
+                if (!Convert.ToBoolean(Enum.Parse(typeof(YesNo),(excelDatatable.Rows[1][col].ToString())))) continue;
                 sd = new ServicesData();
                 for (int row = 0; row < 2; row++)
                     if (excelDatatable.Rows[row][col].ToString() != "")
                     {
                         sd.Service = column.ColumnName;
                         if (row == 0) sd.ServiceName = excelDatatable.Rows[row][col].ToString();
-                        if (row == 1) sd.ServiceFlag = Convert.ToBoolean(Convert.ToInt32(excelDatatable.Rows[row][col].ToString()));
+                        if (row == 1) sd.skipService = !Convert.ToBoolean(Enum.Parse(typeof(YesNo), (excelDatatable.Rows[row][col].ToString())));
                     }
 
                 int machineRowCounter = 2;
@@ -168,20 +173,18 @@ namespace ServiceStatus
             return listServices;
         }
 
-        public ServiceController GetCurrentServiceStatus(List<ServicesData> servicesFromExcel, ManagementScope scope = null)
+        public void GetCurrentServiceStatus(List<ServicesData> servicesListFromExcel, ManagementScope scope)
         {
             ServiceController sc = null;
             bool isServiceCheckSuccess = false;
-            foreach (var item in servicesFromExcel)
+            foreach (var item in servicesListFromExcel)
             {
                 try
                 {
-                    if (!item.ServiceFlag)
+                    if (!item.skipService)
                     {
                         if (scope != null)
                             sc = new ServiceController(item.ServiceName, scope.Path.Server);
-                        else
-                            sc = new ServiceController(item.ServiceName);
                         var currentStatus = sc.Status.ToString();
                         item.CurrentServiceStatus = currentStatus;
                         if (currentStatus.Contains("was not found on computer"))
@@ -199,13 +202,13 @@ namespace ServiceStatus
                 }
                 item.IsServiceCheckSuccess = isServiceCheckSuccess;
             }
-            return sc;
+            //return sc;
         }
 
-        public void StartStopServices(List<ServicesData> servicesFromExcel, ServiceController sc)
+        public void StartStopServices(List<ServicesData> servicesFromExcel, ManagementScope scope)
         {
-            bool isSuccess = false;
-            string message = string.Empty;
+            bool isStatusChangeSuccess = false;
+            string statusChangemessage = string.Empty;
             string currentServiceStatus = string.Empty;
             string expectedServiceStatus = string.Empty;
             string serviceName = string.Empty;
@@ -214,38 +217,50 @@ namespace ServiceStatus
             {
                 try
                 {
+                    var serviceController = new ServiceController(service.ServiceName, scope.Path.Server);
                     currentServiceStatus = service.CurrentServiceStatus;
                     expectedServiceStatus = service.ExpectedServiceStatus;
-                    serviceName = service.ServiceName;
                     serviceDisplayName = service.Service;
+                    serviceName = service.ServiceName;
 
                     if (currentServiceStatus != null)
                         if (currentServiceStatus == expectedServiceStatus)
+                        {
+                            service.IsServiceStatusAsExpected = true;
                             continue;
+                        }
                         else
                         {
-                            if (expectedServiceStatus == ServiceControllerStatus.Running.ToString())
-                            {
-                                sc.Start();
-                                sc.WaitForStatus(ServiceControllerStatus.Running, TimeSpan.FromSeconds(10));
-                                message = serviceDisplayName + "Service Started Successfully";
-                            }
-                            else if (expectedServiceStatus == ServiceControllerStatus.Stopped.ToString())
-                            {
-                                sc.Stop();
-                                sc.WaitForStatus(ServiceControllerStatus.Stopped, TimeSpan.FromSeconds(10));
-                                message = serviceDisplayName + "Service Stopped Successfully";
-                            }
-                            isSuccess = true;
+                            if (service.IsServiceCheckSuccess)
+                                if (expectedServiceStatus == ServiceControllerStatus.Running.ToString())
+                                {
+                                    serviceController.Start();
+                                    serviceController.WaitForStatus(ServiceControllerStatus.Running, TimeSpan.FromSeconds(10));
+                                    statusChangemessage = serviceDisplayName + " Service Started Successfully";
+                                    service.IsStarted = true;
+                                }
+                                else if (expectedServiceStatus == ServiceControllerStatus.Stopped.ToString())
+                                {
+                                    serviceController.Stop();
+                                    serviceController.WaitForStatus(ServiceControllerStatus.Stopped, TimeSpan.FromSeconds(10));
+                                    statusChangemessage = serviceDisplayName + " Service Stopped Successfully";
+                                    service.IsStopped = true;
+                                }
+                                else
+                                {
+                                    isStatusChangeSuccess = false;
+                                    statusChangemessage = currentServiceStatus;
+                                }
+                            isStatusChangeSuccess = true;
                         }
                 }
                 catch (Exception ex)
                 {
-                    isSuccess = false;
-                    message = "Failure to change the service status from " + currentServiceStatus + " to " + expectedServiceStatus + " for Service " + serviceDisplayName + " Error -> " + ex.Message;
+                    isStatusChangeSuccess = false;
+                    statusChangemessage = "Failure to change the service status from " + currentServiceStatus + " to " + expectedServiceStatus + " for Service " + serviceDisplayName + " Error -> " + ex.Message;
                 }
-                service.IsStartStopSuccess = isSuccess;
-                service.StartStopMessage = message;
+                service.IsStartStopSuccess = isStatusChangeSuccess;
+                service.StartStopMessage = statusChangemessage;
             }
         }
     }

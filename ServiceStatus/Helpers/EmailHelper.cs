@@ -43,7 +43,7 @@ namespace ServiceStatus
 
             mail.IsBodyHtml = true;
 
-            string htmlBody = @"<p><b>Hi all</b>,
+            string htmlBody = @"<p>Hi all,
                         </br>
                         <br>Please find herewith the Service Running Status as on <span style=background-color:yellow>" + DateTime.Now + "</span> as below: </br></br>"
                         + htmlTable.ToString() +
@@ -69,7 +69,7 @@ namespace ServiceStatus
             #region Email Send
             try
             {
-                //smtpServer.Send(mail);
+                smtpServer.Send(mail);
                 // test.Log(LogStatus.Pass, "Email Send To: " + mail.To + "</br>And as Cc to " + mail.CC);
             }
             catch (SmtpException ex)
