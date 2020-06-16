@@ -17,7 +17,7 @@ namespace ServiceStatus
             FileHelper fileHelper = new FileHelper();
             var smtpServer = new SmtpClient("smtp-mail.outlook.com");
             smtpServer.Port = 587;
-            smtpServer.Credentials = new NetworkCredential("neelkanth03@outlook.com", "Pushpa#86");
+            smtpServer.Credentials = new NetworkCredential("neelkanth03@outlook.com", "Password enter here");
             smtpServer.EnableSsl = true;
 
             var mail = new MailMessage();
